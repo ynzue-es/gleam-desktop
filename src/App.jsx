@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { Button } from './components/ui/button'
+import Logo from './components/ui/logo'
+import { useEffect } from "react"
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)")
+    const applyTheme = (e) => {
+      if (e.matches) {
+        document.documentElement.classList.add("dark")
+      } else {
+        document.documentElement.classList.remove("dark")
+      }
+    }
+    applyTheme(mq)
+    mq.addEventListener("change", applyTheme)
+    return () => mq.removeEventListener("change", applyTheme)
+  }, [])
 
   return (
-    <>
-      <div>
-        <h1 className='text-red-500'>Hello World</h1>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+    <div className="flex flex-col min-h-[90vh] items-center">
+      <div className="flex flex-col items-center space-y-6 flex-1 justify-center">
+        <p className="flex items-center justify-center text-4xl">
+          Gleam
+          <span className="relative flex h-[30px] w-[30px] items-center justify-center ml-5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--foreground)] animate-ping opacity-75"></span>
+            <span className="relative inline-flex rounded-full bg-[var(--foreground)] h-[30px] w-[30px]"></span>
+          </span>
         </p>
+        <div className="flex flex-col h-20 w-80 justify-between">
+          <Button variant="outline">Se connecter</Button>
+          <Button>Inscription gratuite</Button>
+        </div>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <footer className="w-full py-4 flex flex-col items-center space-y-5 mt-auto text-sm">
+        <Logo />
+        <div className="text-neutral-500 *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+          <a href="#"> Conditions d'utilisation</a> | <a href="#">Politique de confidentialité</a>.
+        </div>
+      </footer>
+    </div>
   )
 }
 
