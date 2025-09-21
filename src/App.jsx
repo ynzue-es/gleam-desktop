@@ -1,7 +1,8 @@
 import './App.css'
 import { Button } from './components/ui/button'
 import Logo from './components/ui/logo'
-import { useEffect } from "react"
+import { useEffect, useCallback } from "react"
+import { generateVerifier, generateChallenge } from "./lib/pkce";
 
 function App() {
 
@@ -19,6 +20,24 @@ function App() {
     return () => mq.removeEventListener("change", applyTheme)
   }, [])
 
+
+  const handleLogin = async () => {
+    const verifier = generateVerifier();
+    const challenge = await generateChallenge(verifier);
+
+    localStorage.setItem("pkce_verifier", verifier);
+
+    const authUrl = new URL("http://localhost/v1/core/o/authorize/");
+    authUrl.searchParams.set("client_id", "CfMgF6sdyKtkQcaA1f92VKn0kL2oOtUtgeH9ff1z");
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("redirect_uri", "http://localhost:3000/callback");
+    authUrl.searchParams.set("scope", "read write");
+    authUrl.searchParams.set("code_challenge", challenge);
+    authUrl.searchParams.set("code_challenge_method", "S256");
+
+    window.electronAPI.openExternal(authUrl.toString());
+  };
+
   return (
     <div className="flex flex-col min-h-[90vh] items-center">
       <div className="flex flex-col items-center space-y-6 flex-1 justify-center">
@@ -32,14 +51,7 @@ function App() {
         <div className="flex flex-col h-20 w-80 justify-between">
           <Button
             variant="outline"
-            onClick={() => {
-              const authUrl = new URL("http://localhost/v1/core/o/authorize/")
-              authUrl.searchParams.set("client_id", "jfrGde7FrhdBvgjqIRF1O1Y7WHkJGoNrDQozJ699")
-              authUrl.searchParams.set("response_type", "code")
-              authUrl.searchParams.set("redirect_uri", "gleam://auth/callback")
-              authUrl.searchParams.set("scope", "read write")
-              window.electronAPI.openExternal(authUrl.toString())
-            }}
+            onClick={handleLogin}
           >
             Se connecter
           </Button>
