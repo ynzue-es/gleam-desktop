@@ -30,7 +30,19 @@ function App() {
           </span>
         </p>
         <div className="flex flex-col h-20 w-80 justify-between">
-          <Button variant="outline">Se connecter</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              const authUrl = new URL("http://localhost/v1/core/o/authorize/")
+              authUrl.searchParams.set("client_id", "jfrGde7FrhdBvgjqIRF1O1Y7WHkJGoNrDQozJ699")
+              authUrl.searchParams.set("response_type", "code")
+              authUrl.searchParams.set("redirect_uri", "gleam://auth/callback")
+              authUrl.searchParams.set("scope", "read write")
+              window.electronAPI.openExternal(authUrl.toString())
+            }}
+          >
+            Se connecter
+          </Button>
           <Button>Inscription gratuite</Button>
         </div>
       </div>

@@ -2,6 +2,23 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 
 function createWindow() {
+  app.whenReady().then(() => {
+    createWindow()
+    app.setAsDefaultProtocolClient("gleam")
+
+    ipcMain.handle("open-external", async (event, url) => {
+      await shell.openExternal(url)
+    })
+  })
+
+  app.on("open-url", (event, url) => {
+    event.preventDefault()
+    if (url.startsWith("gleam://auth/callback")) {
+      const win = BrowserWindow.getAllWindows()[0]
+      win.webContents.send("auth-callback", url)
+    }
+  })
+
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -9,6 +26,8 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+
 
   if (process.env.NODE_ENV === "development") {
     win.loadURL("http://localhost:5173");
