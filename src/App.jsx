@@ -1,7 +1,7 @@
 import './App.css'
 import { Button } from './components/ui/button'
 import Logo from './components/ui/logo'
-import { useEffect, useCallback } from "react"
+import { useEffect } from "react"
 import { generateVerifier, generateChallenge } from "./lib/pkce";
 
 function App() {
@@ -20,7 +20,6 @@ function App() {
     return () => mq.removeEventListener("change", applyTheme)
   }, [])
 
-
   const handleLogin = async () => {
     const verifier = generateVerifier();
     const challenge = await generateChallenge(verifier);
@@ -28,13 +27,13 @@ function App() {
     localStorage.setItem("pkce_verifier", verifier);
 
     const authUrl = new URL("http://localhost/v1/core/o/authorize/");
-    authUrl.searchParams.set("client_id", "CfMgF6sdyKtkQcaA1f92VKn0kL2oOtUtgeH9ff1z");
+    authUrl.searchParams.set("client_id", "4htsqMnFWwVJFPjATKYppz5aVaI4FvCR3o63tv07");
     authUrl.searchParams.set("response_type", "code");
-    authUrl.searchParams.set("redirect_uri", "http://localhost:3000/callback");
+    authUrl.searchParams.set("redirect_uri", "http://localhost:4545/callback");
     authUrl.searchParams.set("scope", "read write");
     authUrl.searchParams.set("code_challenge", challenge);
     authUrl.searchParams.set("code_challenge_method", "S256");
-
+    authUrl.searchParams.set("state", "web")
     window.electronAPI.openExternal(authUrl.toString());
   };
 
