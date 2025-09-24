@@ -2,7 +2,7 @@ import './App.css'
 import { Button } from './components/ui/button'
 import Logo from './components/ui/logo'
 import { useEffect } from "react"
-import { generateVerifier, generateChallenge } from "./lib/pkce";
+import { generateVerifier, generateChallenge, generateState } from "./lib/encrypt";
 
 function App() {
 
@@ -23,17 +23,14 @@ function App() {
   const handleLogin = async () => {
     const verifier = generateVerifier();
     const challenge = await generateChallenge(verifier);
+    const state = generateState();
 
-    localStorage.setItem("pkce_verifier", verifier);
+    await window.electronAPI.setPkceData({ verifier, state });
 
-    const authUrl = new URL("http://localhost/v1/core/o/authorize/");
-    authUrl.searchParams.set("client_id", "4htsqMnFWwVJFPjATKYppz5aVaI4FvCR3o63tv07");
-    authUrl.searchParams.set("response_type", "code");
-    authUrl.searchParams.set("redirect_uri", "http://localhost:4545/callback");
-    authUrl.searchParams.set("scope", "read write");
+    const authUrl = new URL("http://localhost/login?client=desktop");
     authUrl.searchParams.set("code_challenge", challenge);
     authUrl.searchParams.set("code_challenge_method", "S256");
-    authUrl.searchParams.set("state", "web")
+    authUrl.searchParams.set("state", state);
     window.electronAPI.openExternal(authUrl.toString());
   };
 

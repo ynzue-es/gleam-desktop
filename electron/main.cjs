@@ -2,6 +2,13 @@ const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
 const http = require("http");
 const { exchangeCodeForToken } = require("./tokens.js");
+const keytar = require("keytar");
+
+ipcMain.handle("set-pkce-data", (event, { verifier, state }) => {
+  global.pkceVerifier = verifier;
+  global.oauthState = state;
+  console.log("📦 PKCE data reçue:", { verifier, state });
+});
 
 function startOAuthServer(win) {
   const server = http.createServer(async (req, res) => {
@@ -11,18 +18,30 @@ function startOAuthServer(win) {
       try {
         const url = new URL(req.url, "http://localhost:4545");
         const code = url.searchParams.get("code");
+        const returnedState = url.searchParams.get("state");
         const error = url.searchParams.get("error");
         const desc = url.searchParams.get("error_description");
+
         console.log("➡️ Code reçu:", code);
+
         if (error) {
           console.error("❌ Erreur OAuth2:", error, desc);
+          throw new Error(error);
         }
+
+        if (returnedState !== global.oauthState) {
+          throw new Error("Invalid state");
+        }
+
         console.log("🔄 Échange du code contre un token…");
         const tokens = await exchangeCodeForToken(code, global.pkceVerifier);
         console.log("✅ Tokens reçus:", tokens);
+
         await keytar.setPassword("gleam-desktop", "oauth-tokens", JSON.stringify(tokens));
         console.log("🔐 Tokens stockés dans Keytar");
+
         win.webContents.send("auth-success");
+
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end("<h2>Connexion réussie, vous pouvez retourner sur Gleam ✅</h2>");
       } catch (err) {
@@ -38,6 +57,7 @@ function startOAuthServer(win) {
       res.end("Not Found");
     }
   });
+
   server.listen(4545, "127.0.0.1", () => {
     console.log("🚀 OAuth callback server running on http://127.0.0.1:4545");
   });
@@ -56,7 +76,7 @@ function createWindow() {
 
   if (process.env.NODE_ENV === "development") {
     win.loadURL("http://localhost:5173");
-    //win.webContents.openDevTools();
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }

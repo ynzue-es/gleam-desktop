@@ -5,4 +5,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onAuthCallback: (callback) => {
     ipcRenderer.on("auth-callback", (event, data) => callback(data));
   },
+  setPkceData: (data) => ipcRenderer.invoke("set-pkce-data", data),
 });
