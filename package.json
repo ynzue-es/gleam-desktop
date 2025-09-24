@@ -1,13 +1,15 @@
 {
   "name": "gleam-desktop",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "electron": "cross-env NODE_ENV=development electron electron/main.cjs",
     "build": "vite build",
-    "start": "electron electron/main.cjs"
+    "start": "electron electron/main.cjs",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "@fontsource/geist": "^5.2.8",
@@ -30,6 +32,7 @@
     "autoprefixer": "^10.4.21",
     "cross-env": "^10.0.0",
     "electron": "^36.9.1",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.35.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -38,5 +41,25 @@
     "tailwindcss": "^4.1.13",
     "tw-animate-css": "^1.3.8",
     "vite": "^7.1.6"
+  },
+  "build": {
+    "appId": "com.gleam.desktop",
+    "productName": "Gleam",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "protocols": [
+      {
+        "name": "Gleam Protocol",
+        "schemes": ["gleam"]
+      }
+    ]
   }
 }

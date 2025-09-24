@@ -1,15 +1,21 @@
 export async function exchangeCodeForToken(code, pkce_verifier) {
-  const response = await fetch("http://localhost/o/token/", {   // <-- mets bien ton port backend
+  const redirect =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:4545/callback"
+      : "gleam://auth/callback";
+
+  const response = await fetch("http://localhost/o/token/", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code: code,
-      redirect_uri: "http://localhost:4545/callback",
+      redirect_uri: redirect,
       client_id: "4htsqMnFWwVJFPjATKYppz5aVaI4FvCR3o63tv07",
       code_verifier: pkce_verifier,
     }),
   });
+
   const text = await response.text();
   console.log("Raw token response:", text);
   let data;
